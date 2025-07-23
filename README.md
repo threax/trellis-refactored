@@ -1,6 +1,6 @@
 ## WARNING
-This is a work in progress repo under active development. There is a bug with texturing - black lines around edges. Expect fix in the next commit. Sorry and Thank you. 
-Fill holes functionality is a work in progress.
+This is a work in progress repo under active development. 
+Fill holes functionality from the original TRELLIS is missing and is a work in progress.
 
 ## Introduction
 The repo makes 2 major modifications to the original TRELLIS library:

@@ -1,6 +1,9 @@
-## WARNING
-This is a work in progress repo under active development. 
-Fill holes functionality from the original TRELLIS is missing and is a work in progress.
+[!CAUTION]
+PROJECT STATUS: ARCHIVED (November 2025)
+
+This repository was developed as a research project for the Master of Science in the Integrated Science and Technology Program at Southeastern Louisiana University.
+
+Development has officially stopped. This codebase is no longer actively maintained and serves primarily as a static artifact/reference for the accompanying project report. Issues and Pull Requests may not be monitored.
 
 ## Introduction
 The repo makes 2 major modifications to the original TRELLIS library:

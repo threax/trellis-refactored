@@ -24,12 +24,12 @@ os.makedirs(TMP_DIR, exist_ok=True)
 
 
 def start_session(req: gr.Request):
-    user_dir = os.path.join(TMP_DIR, str(req.session_hash))
+    user_dir = os.path.join(TMP_DIR, "singlesession")
     os.makedirs(user_dir, exist_ok=True)
     
     
 def end_session(req: gr.Request):
-    user_dir = os.path.join(TMP_DIR, str(req.session_hash))
+    user_dir = os.path.join(TMP_DIR, "singlesession")
     shutil.rmtree(user_dir)
 
 class GlobalTimer:
@@ -150,7 +150,7 @@ def image_to_3d(
     slat_sampling_steps: int,
     multiimage_algo: Literal["multidiffusion", "stochastic"],
     req: gr.Request,
-) -> Tuple[dict, str]:
+) -> Tuple[str, str]:
     """
     Convert an image to a 3D model.
 
@@ -172,7 +172,7 @@ def image_to_3d(
     
     timer.start()
 
-    user_dir = os.path.join(TMP_DIR, str(req.session_hash))
+    user_dir = os.path.join(TMP_DIR, "singlesession")
     if not is_multiimage:
         outputs = pipeline.run(
             image,
@@ -210,12 +210,14 @@ def image_to_3d(
     video_path = os.path.join(user_dir, 'sample.mp4')
     imageio.mimsave(video_path, video, fps=15)
     state = pack_state(outputs['gaussian'][0], outputs['mesh'][0])
+    state_path = os.path.join(user_dir, 'state.pt')
+    torch.save(state, state_path)
     torch.cuda.empty_cache()
-    return state, video_path
+    return state_path, video_path
 
 
 def extract_glb(
-    state: dict,
+    state_path: str,
     mesh_simplify: float,
     texture_size: int,
     req: gr.Request,
@@ -233,7 +235,8 @@ def extract_glb(
     """
 
     try:
-        user_dir = os.path.join(TMP_DIR, str(req.session_hash))
+        user_dir = os.path.join(TMP_DIR, "singlesession")
+        state = torch.load(state_path)
         gs, mesh = unpack_state(state)
         glb = postprocessing_utils.to_glb(gs, mesh, simplify=mesh_simplify, texture_size=texture_size, verbose=True)
         glb_path = os.path.join(user_dir, 'sample.glb')
@@ -249,7 +252,7 @@ def extract_glb(
     return glb_path, glb_path
 
 
-def extract_gaussian(state: dict, req: gr.Request) -> Tuple[str, str]:
+def extract_gaussian(state_path: str, req: gr.Request) -> Tuple[str, str]:
     """
     Extract a Gaussian file from the 3D model.
 
@@ -259,7 +262,8 @@ def extract_gaussian(state: dict, req: gr.Request) -> Tuple[str, str]:
     Returns:
         str: The path to the extracted Gaussian file.
     """
-    user_dir = os.path.join(TMP_DIR, str(req.session_hash))
+    user_dir = os.path.join(TMP_DIR, "singlesession")
+    state = torch.load(state_path)
     gs, _ = unpack_state(state)
     gaussian_path = os.path.join(user_dir, 'sample.ply')
     gs.save_ply(gaussian_path)
@@ -351,7 +355,7 @@ with gr.Blocks(delete_cache=(600, 600)) as demo:
                 download_gs = gr.DownloadButton(label="Download Gaussian", interactive=False)  
     
     is_multiimage = gr.Checkbox(value=False, visible=False) # Use a checkbox to allow api to send this value to the server
-    output_buf = gr.State()
+    output_buf = gr.Textbox(visible=False)
 
     # Example images at the bottom of the page
     with gr.Row() as single_image_example:

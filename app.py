@@ -236,7 +236,7 @@ def extract_glb(
 
     try:
         user_dir = os.path.join(TMP_DIR, "singlesession")
-        state = torch.load(state_path)
+        state = torch.load(state_path, weights_only=False) # This is ok since it is this app's data
         gs, mesh = unpack_state(state)
         glb = postprocessing_utils.to_glb(gs, mesh, simplify=mesh_simplify, texture_size=texture_size, verbose=True)
         glb_path = os.path.join(user_dir, 'sample.glb')
@@ -263,7 +263,7 @@ def extract_gaussian(state_path: str, req: gr.Request) -> Tuple[str, str]:
         str: The path to the extracted Gaussian file.
     """
     user_dir = os.path.join(TMP_DIR, "singlesession")
-    state = torch.load(state_path)
+    state = torch.load(state_path, weights_only=False) # This is ok since it is this app's data
     gs, _ = unpack_state(state)
     gaussian_path = os.path.join(user_dir, 'sample.ply')
     gs.save_ply(gaussian_path)

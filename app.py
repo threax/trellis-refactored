@@ -350,7 +350,7 @@ with gr.Blocks(delete_cache=(600, 600)) as demo:
                 download_glb = gr.DownloadButton(label="Download GLB", interactive=False)
                 download_gs = gr.DownloadButton(label="Download Gaussian", interactive=False)  
     
-    is_multiimage = gr.State(False)
+    is_multiimage = gr.Checkbox(value=False, visible=False) # Use a checkbox to allow api to send this value to the server
     output_buf = gr.State()
 
     # Example images at the bottom of the page

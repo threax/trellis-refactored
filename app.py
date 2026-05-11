@@ -1,5 +1,4 @@
 import gradio as gr
-from gradio_litmodel3d import LitModel3D
 
 import os
 import shutil
@@ -345,7 +344,7 @@ with gr.Blocks(delete_cache=(600, 600)) as demo:
 
         with gr.Column():
             video_output = gr.Video(label="Generated 3D Asset", autoplay=True, loop=True, height=300)
-            model_output = LitModel3D(label="Extracted GLB/Gaussian", exposure=10.0, height=300)
+            model_output = gr.Model3D(label="Extracted GLB/Gaussian", height=300)
             
             with gr.Row():
                 download_glb = gr.DownloadButton(label="Download GLB", interactive=False)

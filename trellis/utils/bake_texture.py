@@ -56,6 +56,7 @@ def postprocess_mesh(
     simplify: bool = True,
     simplify_ratio: float = 0.9,
     verbose: bool = False,
+    fill_holes: bool = False,
 ):
     """
     Postprocess a mesh by simplifying, removing invisible faces, and removing isolated pieces.
@@ -78,6 +79,15 @@ def postprocess_mesh(
         vertices, faces = mesh.points, mesh.faces.reshape(-1, 4)[:, 1:]
         if verbose:
             tqdm.write(f'After decimate: {vertices.shape[0]} vertices, {faces.shape[0]} faces')
+
+    # Remove invisible faces
+    if fill_holes:
+        vertices, faces = torch.tensor(vertices).cuda(), torch.tensor(faces.astype(np.int32)).cuda()
+        vertices, faces = _fill_holes(
+            vertices, faces,
+            verbose=verbose,
+        )
+        vertices, faces = vertices.cpu().numpy(), faces.cpu().numpy()
         if verbose:
             tqdm.write(f'After remove invisible faces: {vertices.shape[0]} vertices, {faces.shape[0]} faces')
 
@@ -274,8 +284,8 @@ def bake_texture_and_return_mesh(
         # Transform vertices (camera looks along positive Z)
         verts_cam = (R_cam @ V.T + T_cam[:, None]).T  
         z_vals = verts_cam[:, 2]
-        print(f"View {k}: Z-range [{z_vals.min().item():.2f}, {z_vals.max().item():.2f}] "
-            f"Front: {(z_vals > 0).sum()}/{len(z_vals)} vertices")
+        #print(f"View {k}: Z-range [{z_vals.min().item():.2f}, {z_vals.max().item():.2f}] "
+        #    f"Front: {(z_vals > 0).sum()}/{len(z_vals)} vertices")
 
         # --- rotate mask & colour image by 180° (two 90° turns) ---
         mask = torch.rot90(mask, 2, (0, 1))   # dims=(Y,X)
